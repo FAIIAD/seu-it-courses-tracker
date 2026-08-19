@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>متتبع الخطة الدراسية</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #e0e0e0; padding: 20px; }
+        .container { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .box { background: #1e1e1e; padding: 20px; border-radius: 8px; width: 45%; min-width: 350px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h3 { text-align: center; color: #ffffff; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 15px;}
+        
+        ul { list-style-type: none; padding: 0; margin: 0; height: 550px; overflow-y: auto; padding-right: 5px;}
+        ul::-webkit-scrollbar { width: 8px; }
+        ul::-webkit-scrollbar-track { background: #2c2c2c; border-radius: 4px; }
+        ul::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ul::-webkit-scrollbar-thumb:hover { background: #777; }
+        
+        li { background: #2a2a2a; border: 1px solid #444; margin: 8px 0; padding: 12px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; font-size: 14px;}
+        li:hover { background: #383838; }
+        .course-info { display: flex; flex-direction: column; gap: 4px; }
+        .course-hours { font-size: 12px; color: #aaa; }
+        
+        button { background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        
+        .completed-box li { background: #1b3a20; border-color: #2e6035; }
+        .completed-box li:hover { background: #234d2a; }
+        .completed-box button { background: #d32f2f; }
+        .completed-box button:hover { background: #b71c1c; }
+        
+        .stats { text-align: center; color: #bbb; font-size: 15px; margin-top: 5px; display: flex; justify-content: space-around; background: #252525; padding: 8px; border-radius: 5px;}
+        .stats span { font-weight: bold; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">متتبع الخطة الدراسية</h2>
+
+    <div class="container">
+        <div class="box">
+            <h3>المواد المتبقية 📚</h3>
+            <div class="stats">
+                <div>المواد: <span id="remCount">0</span></div>
+                <div>الساعات: <span id="remHours">0</span></div>
+            </div>
+            <ul id="remainingList" style="margin-top: 15px;"></ul>
+        </div>
+
+        <div class="box completed-box">
+            <h3>المواد المنجزة 🎓</h3>
+            <div class="stats">
+                <div>المواد: <span id="compCount">0</span></div>
+                <div>الساعات: <span id="compHours">0</span></div>
+            </div>
+            <ul id="completedList" style="margin-top: 15px;"></ul>
+        </div>
+    </div>
+
+    <script>
+        const courses = [
+            { name: "ENG001: English Skills 1", hours: 8 },
+            { name: "ENG002: English Skills 2", hours: 8 },
+            { name: "CS001: Introduction to Artificial Intelligent and Computing", hours: 3 },
+            { name: "COMM001: Communication Skills", hours: 2 },
+            { name: "CI001: Academic Skills", hours: 2 },
+            { name: "MATH001: Fundamentals of Mathematics", hours: 3 },
+            { name: "ISLM101: ISLAMIC FAITH", hours: 2 },
+            { name: "ISLM102: PROFESSIONAL CONDUCT & ETHICS IN ISLAM", hours: 2 },
+            { name: "ISLM103: ISLAMIC ECONOMIC SYSTEM", hours: 2 },
+            { name: "ISLM104: ISLAMIC SOCIAL SYSTEM", hours: 2 },
+            { name: "IT231: Introduction to IT and IS", hours: 3 },
+            { name: "IT232: Object Oriented Programming", hours: 3 },
+            { name: "IT233: Computer Organization", hours: 3 },
+            { name: "MATH150: Discrete Mathematics", hours: 3 },
+            { name: "SCI101: General Physics 1", hours: 3 },
+            { name: "SCI201: General Physics 2", hours: 3 },
+            { name: "ENG103: Technical Writing", hours: 3 },
+            { name: "STAT101: Statistics", hours: 3 },
+            { name: "IT241: Operating Systems", hours: 3 },
+            { name: "IT244: Introduction to Database", hours: 3 },
+            { name: "IT245: Data Structure", hours: 3 },
+            { name: "MATH251: Linear Algebra", hours: 3 },
+            { name: "IT351: Computer Networks", hours: 3 },
+            { name: "IT352: Human Computer Interaction", hours: 3 },
+            { name: "IT353: System Analysis and Design", hours: 3 },
+            { name: "IT354: Database Management Systems", hours: 3 },
+            { name: "IT361: Web Technologies", hours: 3 },
+            { name: "IT362: IT Project Management", hours: 3 },
+            { name: "IT363: Network Management", hours: 3 },
+            { name: "IT364: IT Entrepreneurship and Innovation", hours: 3 },
+            { name: "IT365: Enterprise Systems", hours: 3 },
+            { name: "IT475: Decision Support Systems", hours: 3 },
+            { name: "IT476: IT Security & Policies", hours: 3 },
+            { name: "IT479: Senior Project I", hours: 3 },
+            { name: "IT485: Professional Ethics in IT", hours: 3 },
+            { name: "IT487: Mobile Application Development", hours: 3 },
+            { name: "IT489: Senior Project II", hours: 3 },
+            { name: "IT499: Practical Training", hours: 3 },
+            { name: "IT4XX: Elective Course in IT 1", hours: 3 },
+            { name: "IT4XX: Elective Course in IT 2", hours: 3 },
+            { name: "IT4XX: Elective Course in IT 3", hours: 3 },
+            { name: "IT4XX: Elective Course in IT 4", hours: 3 }
+        ];
+
+        const remainingList = document.getElementById('remainingList');
+        const completedList = document.getElementById('completedList');
+        
+        function updateStats() {
+            let remHrs = 0, compHrs = 0;
+            
+            Array.from(remainingList.children).forEach(li => {
+                remHrs += parseInt(li.getAttribute('data-hours'));
+            });
+            Array.from(completedList.children).forEach(li => {
+                compHrs += parseInt(li.getAttribute('data-hours'));
+            });
+
+            document.getElementById('remCount').innerText = remainingList.children.length;
+            document.getElementById('remHours').innerText = remHrs;
+            document.getElementById('compCount').innerText = completedList.children.length;
+            document.getElementById('compHours').innerText = compHrs;
+        }
+
+        function moveCourse(button) {
+            let listItem = button.parentElement;
+
+            if (listItem.parentElement.id === "remainingList") {
+                button.innerText = "تراجع ↩️";
+                completedList.appendChild(listItem);
+            } else {
+                button.innerText = "إنجاز ✅";
+                
+                let items = Array.from(remainingList.children);
+                let currentIndex = parseInt(listItem.getAttribute('data-index'));
+                let inserted = false;
+                
+                for (let i = 0; i < items.length; i++) {
+                    if (parseInt(items[i].getAttribute('data-index')) > currentIndex) {
+                        remainingList.insertBefore(listItem, items[i]);
+                        inserted = true;
+                        break;
+                    }
+                }
+                
+                if (!inserted) {
+                    remainingList.appendChild(listItem);
+                }
+            }
+            updateStats();
+        }
+
+        courses.forEach((course, index) => {
+            let li = document.createElement("li");
+            li.setAttribute('data-hours', course.hours);
+            li.setAttribute('data-index', index); 
+            li.innerHTML = `
+                <div class="course-info">
+                    <span>${course.name}</span>
+                    <span class="course-hours">الساعات: ${course.hours}</span>
+                </div>
+                <button onclick="moveCourse(this)">إنجاز ✅</button>
+            `;
+            remainingList.appendChild(li);
+        });
+
+        updateStats();
+    </script>
+</body>
+</html>
